@@ -1,4 +1,12 @@
 #! /usr/bin/python
+'''
+Description: First step of dsx binding site search: identifying all putative binding site
+motifs in a genome.
+Author: Barbara Vreede
+Contact: b.vreede@gmail.com
+Date: 23 August 2016
+'''
+
 
 import dsx_config, re
 
@@ -22,3 +30,12 @@ for seq in erdman,yizarkower,murphy,luobaker:
 dsxbinding = list(set(dsxbinding)) #remove duplicates
 dsxbinding_compiled = [re.compile(r) for r in dsxbinding] #compile the regular expressions
 
+# Search the genome for all possible sequences
+# Write the results to an output file
+out = open("step1.tsv", "w")
+for scaffold in genomedict:
+	for motif in dsxbinding_compiled:
+		for i in motif.finditer(genomedict[scaffold]):
+			mseq = i.group() # the sequence picked up by the RE
+			strt = i.start() # the start site of the identified motif
+			out.write("%s\t%s\t%s\n" %(scaffold,strt,mseq)) #write results to file
