@@ -33,9 +33,13 @@ dsxbinding_compiled = [re.compile(r) for r in dsxbinding] #compile the regular e
 # Search the genome for all possible sequences
 # Write the results to an output file
 out = open("step1.tsv", "w")
+duplicate_prevention = []
 for scaffold in genomedict:
 	for motif in dsxbinding_compiled:
 		for i in motif.finditer(genomedict[scaffold]):
 			mseq = i.group() # the sequence picked up by the RE
 			strt = i.start() # the start site of the identified motif
-			out.write("%s\t%s\t%s\n" %(scaffold,strt,mseq)) #write results to file
+			dp = [scaffold,strt,mseq]
+			if dp not in duplicate_prevention:
+				out.write("%s\t%s\t%s\n" %(scaffold,strt,mseq)) #write results to file
+				duplicate_prevention.append(dp)
