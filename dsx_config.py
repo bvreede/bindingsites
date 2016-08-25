@@ -81,5 +81,22 @@ def list_of_re(seq_in,n_mismatch):
 	relist = list(set(relist))
 	return relist
 	
+def test_scaffold_proximity(loclist,location,maxdist):
+	'''
+	Checks whether a hit in a given location has hits closeby, from a list of other hits,
+	within a given distance.
+	'''
+	minloc = int(location)-maxdist
+	maxloc = int(location)+maxdist
+	score = 0
+	for hit in loclist:
+		hit = int(hit)
+		if hit == int(location): #don't count other hits on the exact same sequence
+			continue
+		elif hit >minloc and hit<maxloc:
+			score+= 1
+		elif hit > maxloc: #stop iterating once you've passed the max location
+			break
+	return score
 
 		
