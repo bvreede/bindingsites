@@ -11,6 +11,8 @@ path_box = "/Users/BarbaraMaria/Box Sync/PROJECT doublesex"
 path_genome = "Data/genome/Otaur.scaffolds.fa" #relative path to box folder
 
 
+# nucleotide translation: DNA opposite strand
+opp = {'A':'T','T':'A','C':'G','G':'C'}
 
 def open_genome(fastadb):
 	'''
@@ -56,6 +58,25 @@ def re2li(s):
 				i_ += i
 	return reli
 	
+def invert_re(expression):
+	'''
+	Inverting a regular expression so it can search the opposite strand.
+	'''
+	#turn expression into list 
+	expli = re2li(expression)
+	#reverse list
+	expli.reverse()
+	#list back to string, so expression is restored
+	expression = ''.join(expli)
+	inverted = ''
+	#for each item in the expression, add the opposite nucleotide to the inverted expression
+	for i in expression:
+		if i in opp:
+			inverted += opp[i] #add the nucleotide from the opposite strand to the inverted string
+		else:
+			inverted += i
+	return inverted
+				
 	
 def list_of_re(seq_in,n_mismatch):
 	'''
@@ -79,7 +100,13 @@ def list_of_re(seq_in,n_mismatch):
 		relist.append(newre)
 	# turn list of re into set to remove duplicates
 	relist = list(set(relist))
-	return relist
+	invlist = []
+	# obtain the inverse expression for each item in the list
+	for r in relist:
+		inv = invert_re(r)
+		invlist.append(inv)
+	return relist,invlist
+	
 	
 def test_scaffold_proximity(loclist,location,maxdist):
 	'''
