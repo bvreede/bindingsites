@@ -23,23 +23,34 @@ luobaker = "GCAACAATGTTGC"
 
 n_mismatch = 2 #number of elements per sequence that can be a mismatch
 
-dsxbinding = []
+dsxbinding,dsxinverse = [],[]
 for seq in erdman,yizarkower,murphy,luobaker:
-	dsxbinding += dsx_config.list_of_re(seq,n_mismatch) #generate all possible sequences with mismatch
+	poss_sequences,poss_inverses = dsx_config.list_of_re(seq,n_mismatch) #generate all possible sequences with mismatch
+	dsxbinding += poss_sequences
+	dsxinverse += poss_inverses
 	
-dsxbinding = list(set(dsxbinding)) #remove duplicates
 dsxbinding_compiled = [re.compile(r) for r in dsxbinding] #compile the regular expressions
+dsxinverse_compiled = [re.compile(r) for r in dsxinverse]
 
 # Search the genome for all possible sequences
 # Write the results to an output file
 out = open("step1.tsv", "w")
-duplicate_prevention = []
 for scaffold in genomedict:
+	duplicate_prevention = [] #empty the duplicate prevention for each scaffold
+	direction = '+' #first search the plus strand
 	for motif in dsxbinding_compiled:
 		for i in motif.finditer(genomedict[scaffold]):
 			mseq = i.group() # the sequence picked up by the RE
 			strt = i.start() # the start site of the identified motif
-			dp = [scaffold,strt,mseq]
-			if dp not in duplicate_prevention:
-				out.write("%s\t%s\t%s\n" %(scaffold,strt,mseq)) #write results to file
-				duplicate_prevention.append(dp)
+			if strt not in duplicate_prevention:
+				out.write("%s\t%s\t%s\t%s\n" %(scaffold,strt,direction,mseq)) #write results to file
+				duplicate_prevention.append(strt)
+	duplicate_prevention = [] #empty the duplicate prevention before starting on the inverse!
+	direction = '-' #now search the minus strand
+	for motif in dsxinverse_compiled: #now search for the inverse motifs! 
+		for i in motif.finditer(genomedict[scaffold]):
+			mseq = dsx_config.invert_re(i.group()) # the sequence picked up by the RE, inversed!
+			strt = i.end() # the END site of the identified motif, which is the START site from the other side!
+			if strt not in duplicate_prevention:
+				out.write("%s\t%s\t%s\t%s\n" %(scaffold,strt,direction,mseq)) #write results to file
+				duplicate_prevention.append(strt)
