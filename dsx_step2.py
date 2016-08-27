@@ -11,26 +11,28 @@ Date: 24 August 2016
 from collections import Counter
 import dsx_config
 
-infile = open("step1.tsv")
-out1 = open("step2_fasta.fa", "w")
-out2 = open("step2_fasta-all.fa", "w")
+infile = open("step1-random.tsv")
 
 #collect the information from the tsv file into:
 ## - a dictionary identifying all possible locations of a 13-mer
 dict13mer = {}
-## - a list of all 13-mers
-list13mer = []
+## - a list of all 13-mers, plus lists for the minus and plus strand
+list13mer,pluslist, minuslist = [],[],[]
 ## - a dictionary collecting all hit locations in a given scaffold
 dictscaf = {}
 for line in infile:
-	line = line.split() #line[0] is the scaffold, line[1] is the location, line[2] is the sequence
-	list13mer.append(line[2]) #add the identified sequence to the list
-	out2.write(">%s_%s\n%s\n\n" %(line[0],line[1],line[2]))
+	line = line.split() #line[0] is the scaffold, line[1] is the location, line[2] is the strand, and line[3] is the sequence
+	list13mer.append(line[3]) #add the identified sequence to the list
+	#add the sequence to the minus or plus strand
+	if line[2] == '+':
+		pluslist.append(line[3])
+	else:
+		minuslist.append(line[3])
 	# sequence data
-	if line[2] not in dict13mer: #if the sequence is unknown: make a new entry
-		dict13mer[line[2]] = [[line[0],line[1]]]
+	if line[3] not in dict13mer: #if the sequence is unknown: make a new entry
+		dict13mer[line[3]] = [[line[0],line[1],line[2]]]
 	else: #the sequence is already in the dictionary, so append the location
-		dict13mer[line[2]] += [[line[0],line[1]]]
+		dict13mer[line[3]] += [[line[0],line[1],line[2]]]
 	# scaffold data
 	if line[0] not in dictscaf:
 		dictscaf[line[0]] = [int(line[1])]
@@ -42,14 +44,43 @@ for line in infile:
 for scaffold in dictscaf:
 	dictscaf[scaffold] = sorted(dictscaf[scaffold])
 	
+pluscommon,minuscommon,totalcommon = {},{},{}
 
 #count how many times each 13 mer was found
 count13mer = Counter(list13mer)
 #identify the 15 most common sequences
-for mc in count13mer.most_common(15):
-	for i in dict13mer[mc[0]]:
-		out1.write(">%s_%s\n%s\n\n" %(i[0],i[1],mc[0]))
-		
+print "25 most common sequences"
+for k,mc in enumerate(count13mer.most_common(25)):
+	print mc
+	totalcommon[mc[0]]=[mc[1],k]
+	
+countplus = Counter(pluslist)
+print "25 most common sequences on plus strand"
+for k,mc in enumerate(countplus.most_common(25)):
+	print mc
+	pluscommon[mc[0]]=[mc[1],k]
+	
+countminus = Counter(minuslist)
+print "25 most common sequences on minus strand"
+for k,mc in enumerate(countminus.most_common(25)):
+	print mc
+	minuscommon[mc[0]]=[mc[1],k]
+	
+	
+print "The most common sequences:"
+for it in count13mer.most_common(25):
+	s = it[0]
+	print s, totalcommon[s]
+	if s in pluscommon:
+		print "on plus:", pluscommon[s]
+	else:
+		print "not in top-25 on plus strand"
+	if s in minuscommon:
+		print "on minus:", minuscommon[s]
+	else:
+		print "not in top-25 on minus strand"
+	
+"""	
 # check for each 13mer whether they appear in clusters
 clusterscores = {}
 for mer in list13mer:
@@ -64,9 +95,7 @@ for mer in list13mer:
 		totalscore += score
 	clusterscores[mer] = totalscore
 	
-for mc in count13mer.most_common(25):
-	print mc[0], count13mer[mc[0]], clusterscores[mc[0]]
+#for mc in count13mer.most_common(25):
+#	print mc[0], count13mer[mc[0]], clusterscores[mc[0]]
 	
-
-
-# combine the two methods: select the 100 most common 13mers and check for clustering only between them
+"""
