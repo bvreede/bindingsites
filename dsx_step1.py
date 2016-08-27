@@ -21,6 +21,12 @@ yizarkower = "[ACG][ATC][AT]ACAATGT[AT][ATG]C"
 murphy =  "[TC][AG][CT][AT]AC[AT][AT][AT]GT[AT][ATG]"
 luobaker = "GCAACAATGTTGC"
 
+# From the top-25 hits identified in O.taurus, the following shuffled random sequences have been generated.
+# To search for these, turn randomsearch to True
+randomstrings = ['TGCCTCGACTTAA', 'AATGGTTTTAAAC', 'TCAGATATTCTAA', 'TGAATTCGTGAAA', 'CGATGGTTCTTTA', 'TTCAGTTTACATC', 'TATCGTATTAGAT', 'TAATAGACTCATT', 'CTGATATAAACAA', 'CGTCTGTCTATAA', 'CTTTTAAAATAGA', 'AAATTAAGTATCA', 'TACAGTTTTTCAT', 'TAACAATTAAATT', 'AAAAAAATAATAA', 'AATTAAATAAGCA', 'TTAAATTTATACA', 'AATGATTGATTTA', 'ACGATTATAGGAA', 'AGAATATTTATTT', 'AATAATGTCTAAA', 'AATAAAATAAAAT', 'CACTCAATTTATA', 'TTTTAATTTTTTT', 'TGATAATAACATT']
+randominverse = [dsx_config.invert_re(e) for e in randomstrings]
+randomsearch = True
+
 n_mismatch = 2 #number of elements per sequence that can be a mismatch
 
 dsxbinding,dsxinverse = [],[]
@@ -29,12 +35,20 @@ for seq in erdman,yizarkower,murphy,luobaker:
 	dsxbinding += poss_sequences
 	dsxinverse += poss_inverses
 	
-dsxbinding_compiled = [re.compile(r) for r in dsxbinding] #compile the regular expressions
-dsxinverse_compiled = [re.compile(r) for r in dsxinverse]
+if randomsearch == True:
+	dsxbinding_compiled = [re.compile(r) for r in randomstrings]
+	dsxinverse_compiled = [re.compile(r) for r in randominverse]
+else:
+	dsxbinding_compiled = [re.compile(r) for r in dsxbinding] #compile the regular expressions
+	dsxinverse_compiled = [re.compile(r) for r in dsxinverse]
+
 
 # Search the genome for all possible sequences
 # Write the results to an output file
-out = open("step1.tsv", "w")
+if randomsearch == True:
+	out = open("step1-random.tsv", "w")
+else:
+	out = open("step1.tsv", "w")
 for scaffold in genomedict:
 	duplicate_prevention = [] #empty the duplicate prevention for each scaffold
 	direction = '+' #first search the plus strand
