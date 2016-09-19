@@ -1,5 +1,5 @@
 '''
-Description: Config file for dsx binding site search.
+Description: Config file for binding site search.
 Author: Barbara Vreede
 Contact: b.vreede@gmail.com
 Date: 23 August 2016
