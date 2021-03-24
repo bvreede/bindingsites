@@ -27,4 +27,4 @@ Step 5. Repeat this process with Drosophila and Tribolium. Repeating with Drosop
 
 We were wondering what you guys thought of this approach, in terms of feasibility and the time it would take to run. I think that providing a list of possible sequences (with up to 2 opportunities for mistmatch) to search in the genome might actually be more simple than finding similarity to a PWM, and in our case a more reasonable way to go since we don't know how similar the binding site in O.taurus is to the binding site in Drosophila.
 
-This project is sadly now used as a trial for SonarCloud. Wah-wah.
+This project is sadly now used as a trial for SonarCloud. But it's being used, that is good, right?
